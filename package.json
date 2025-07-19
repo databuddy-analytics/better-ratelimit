@@ -1,8 +1,8 @@
 {
   "name": "better-ratelimit",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "A framework-agnostic, Effect-powered, observability-native rate limiter designed for real-world infrastructure",
-  "module": "index.ts",
+  "module": "dist/index.js",
   "type": "module",
   "keywords": [
     "rate-limit",

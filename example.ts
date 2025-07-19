@@ -20,7 +20,7 @@ async function basicExample() {
     console.log("Testing rate limit with 3 requests per minute...\n")
 
     for (let i = 1; i <= 5; i++) {
-        const result = await rateLimiter.check(config)
+        const result = await rateLimiter.check(config.key)
 
         console.log(`Request ${i}:`)
         console.log(`  Allowed: ${result.allowed}`)
@@ -35,7 +35,7 @@ async function customStoreExample() {
 
     // Create a custom memory store with smaller cache
     const store = new MemoryStore({ maxSize: 10 })
-    const rateLimiter = new RateLimiter(store)
+    const rateLimiter = new RateLimiter(store, { limit: 2, duration: "30s" })
 
     const config = {
         key: "api:test",
@@ -46,7 +46,7 @@ async function customStoreExample() {
     console.log("Testing with custom store (max 10 entries)...\n")
 
     for (let i = 1; i <= 3; i++) {
-        const result = await rateLimiter.check(config)
+        const result = await rateLimiter.check(config.key)
 
         console.log(`Request ${i}:`)
         console.log(`  Allowed: ${result.allowed}`)
