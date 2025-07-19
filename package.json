@@ -2,7 +2,18 @@
   "name": "better-ratelimit",
   "version": "0.2.3",
   "description": "A framework-agnostic, Effect-powered, observability-native rate limiter designed for real-world infrastructure",
+  "main": "dist/index.js",
   "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
   "type": "module",
   "keywords": [
     "rate-limit",
@@ -21,9 +32,10 @@
   "license": "MIT",
   "scripts": {
     "dev": "bun run index.ts",
-    "build": "bun build index.ts --outdir dist",
+    "build": "tsc",
     "test": "bun test",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "bun run build"
   },
   "devDependencies": {
     "@types/bun": "latest",
