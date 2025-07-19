@@ -11,53 +11,16 @@ export interface InternalRedisClient {
 
 export function createRedisClient(config: RedisConfig, runtime: Runtime): InternalRedisClient {
     switch (runtime) {
-        case "bun":
-            return createBunRedisClient(config)
         case "edge":
             return createUpstashRedisClient(config)
+        case "bun":
         case "node":
         default:
             return createNodeRedisClient(config)
     }
 }
 
-function createBunRedisClient(config: RedisConfig): InternalRedisClient {
-    try {
-        const { connect } = require("bun:redis")
 
-        const client = connect({
-            hostname: config.host,
-            port: config.port,
-            password: config.password,
-            db: config.database,
-            tls: config.tls
-        })
-
-        return {
-            async get(key: string) {
-                return await client.get(key)
-            },
-            async set(key: string, value: string, options?: { ttl?: number }) {
-                if (options?.ttl) {
-                    await client.set(key, value, { ex: options.ttl })
-                } else {
-                    await client.set(key, value)
-                }
-            },
-            async incr(key: string) {
-                return await client.incr(key)
-            },
-            async expire(key: string, ttl: number) {
-                await client.expire(key, ttl)
-            },
-            async disconnect() {
-                await client.quit()
-            }
-        }
-    } catch (error) {
-        throw new Error(`Bun Redis not available: ${error}`)
-    }
-}
 
 function createNodeRedisClient(config: RedisConfig): InternalRedisClient {
     try {
@@ -69,31 +32,51 @@ function createNodeRedisClient(config: RedisConfig): InternalRedisClient {
                 port: config.port,
                 tls: config.tls
             },
-            password: config.password,
-            database: config.database
+            password: config.password || undefined,
+            database: config.database || 0
         })
 
         client.connect()
 
         return {
             async get(key: string) {
-                return await client.get(key)
+                try {
+                    return await client.get(key)
+                } catch (error) {
+                    throw new Error(`Redis GET failed: ${error}`)
+                }
             },
             async set(key: string, value: string, options?: { ttl?: number }) {
-                if (options?.ttl) {
-                    await client.setEx(key, options.ttl, value)
-                } else {
-                    await client.set(key, value)
+                try {
+                    if (options?.ttl) {
+                        await client.setEx(key, options.ttl, value)
+                    } else {
+                        await client.set(key, value)
+                    }
+                } catch (error) {
+                    throw new Error(`Redis SET failed: ${error}`)
                 }
             },
             async incr(key: string) {
-                return await client.incr(key)
+                try {
+                    return await client.incr(key)
+                } catch (error) {
+                    throw new Error(`Redis INCR failed: ${error}`)
+                }
             },
             async expire(key: string, ttl: number) {
-                await client.expire(key, ttl)
+                try {
+                    await client.expire(key, ttl)
+                } catch (error) {
+                    throw new Error(`Redis EXPIRE failed: ${error}`)
+                }
             },
             async disconnect() {
-                await client.disconnect()
+                try {
+                    await client.disconnect()
+                } catch (error) {
+                    // Ignore disconnect errors
+                }
             }
         }
     } catch (error) {
