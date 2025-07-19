@@ -1,16 +1,19 @@
 import type { RateLimitConfig, RateLimitResult, RateLimitStrategy } from "../types"
 import { parseDuration } from "../utils/duration"
 
-export class FixedWindowStrategy implements RateLimitStrategy {
-    readonly name = "fixed-window"
+export class ApproximatedSlidingWindowStrategy implements RateLimitStrategy {
+    readonly name = "approximated-sliding-window"
 
     constructor(private readonly getNow: () => number = () => Date.now()) { }
 
     check(current: number, config: RateLimitConfig): RateLimitResult {
         const now = this.getNow()
         const windowSize = parseDuration(config.duration)
-        const currentWindow = Math.floor(now / windowSize)
-        const windowStart = currentWindow * windowSize
+        const windowCount = 10
+        const subWindowSize = windowSize / windowCount
+
+        const currentSubWindow = Math.floor(now / subWindowSize)
+        const windowStart = currentSubWindow * subWindowSize
         const windowEnd = windowStart + windowSize
 
         const allowed = current <= config.limit
@@ -26,7 +29,9 @@ export class FixedWindowStrategy implements RateLimitStrategy {
                 strategy: this.name,
                 windowStart,
                 windowEnd,
-                currentWindow
+                subWindowSize,
+                windowCount,
+                currentSubWindow
             }
         }
     }
@@ -34,8 +39,10 @@ export class FixedWindowStrategy implements RateLimitStrategy {
     shouldReset(current: number, config: RateLimitConfig): boolean {
         const now = this.getNow()
         const windowSize = parseDuration(config.duration)
-        const currentWindow = Math.floor(now / windowSize)
-        const lastWindow = Math.floor((now - windowSize) / windowSize)
-        return currentWindow > lastWindow
+        const subWindowSize = windowSize / 10
+        const currentSubWindow = Math.floor(now / subWindowSize)
+        const lastSubWindow = Math.floor((now - subWindowSize) / subWindowSize)
+
+        return currentSubWindow > lastSubWindow
     }
 } 

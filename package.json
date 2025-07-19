@@ -26,7 +26,8 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "chalk": "^5.4.1"
   },
   "peerDependencies": {
     "typescript": "^5"

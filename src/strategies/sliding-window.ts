@@ -1,12 +1,13 @@
-import type { RateLimitConfig, RateLimitResult } from "../types"
-import type { RateLimitStrategy } from "./base"
+import type { RateLimitConfig, RateLimitResult, RateLimitStrategy } from "../types"
 import { parseDuration } from "../utils/duration"
 
 export class SlidingWindowStrategy implements RateLimitStrategy {
-    name = "sliding-window"
+    readonly name = "sliding-window"
+
+    constructor(private readonly getNow: () => number = () => Date.now()) { }
 
     check(current: number, config: RateLimitConfig): RateLimitResult {
-        const now = Date.now()
+        const now = this.getNow()
         const windowSize = parseDuration(config.duration)
         const windowStart = now - windowSize
 

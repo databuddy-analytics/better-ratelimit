@@ -1,3 +1,4 @@
+import { Effect } from "effect"
 import type { RateLimitConfig, RateLimitResult, RateLimitStore, RateLimitOptions } from "../types"
 import { parseDuration } from "../utils/duration"
 import { getStrategy, type StrategyName } from "../strategies"
@@ -34,7 +35,7 @@ export class RateLimiter {
         const current = await this.store.increment(config.key, ttl)
 
         const strategyName = config.strategy || this.options.defaultStrategy
-        const strategy = getStrategy(strategyName)
+        const strategy = Effect.runSync(getStrategy(strategyName))
 
         const result = strategy.check(current, {
             ...config,

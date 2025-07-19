@@ -1,8 +1,8 @@
 import type { RateLimitResult, RateLimitStore } from "../types"
+import type { StrategyName } from "../strategies"
 import { RateLimiter } from "../core/rate-limiter"
 import { MemoryStore } from "../adapters/memory"
 import { getIPKey, type RequestContext } from "../utils/ip"
-import type { StrategyName } from "../strategies"
 
 export interface ElysiaContext extends RequestContext {
     set: {
