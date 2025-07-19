@@ -1,5 +1,6 @@
 import { RateLimiter } from "./core/rate-limiter"
 import { MemoryStore } from "./adapters/memory"
+import { RedisAdapter } from "./adapters/redis"
 import type { RateLimitStore } from "./types"
 
 export type { RateLimitConfig, RateLimitResult, RateLimitStore, RateLimitOptions, StoreOptions } from "./types"
@@ -19,6 +20,15 @@ export { FixedWindowStrategy, SlidingWindowStrategy, ApproximatedSlidingWindowSt
 export function createRateLimiter(store?: RateLimitStore) {
     const defaultStore = store || new MemoryStore()
     return new RateLimiter(defaultStore)
+}
+
+// Convenience factory functions
+export function createMemoryRateLimiter(options?: any) {
+    return new RateLimiter(new MemoryStore(options))
+}
+
+export function createRedisRateLimiter(url: string, options?: any) {
+    return new RateLimiter(new RedisAdapter({ url, ...options }))
 }
 
 export default createRateLimiter 

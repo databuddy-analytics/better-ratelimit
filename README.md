@@ -1,130 +1,178 @@
 # better-ratelimit
 
-> A **framework-agnostic**, **Effect-powered**, **observability-native** rate limiter designed for real-world infrastructure, not just demo apps.
+> A **framework-agnostic**, **Effect-powered**, **observability-native** rate limiter designed for real-world infrastructure.
 
 [![Bun](https://img.shields.io/badge/Bun-000000?logo=bun&logoColor=white)](https://bun.sh)
 [![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Effect](https://img.shields.io/badge/Effect-000000?logo=effect&logoColor=white)](https://effect.website/)
 
-## 🌟 **What Makes This Different**
+## 🚀 **Installation**
 
-`better-ratelimit` is built to be **composable, pluggable, and invisible by default** — but gives you deep control when you need it.
-
-### 🚫 **Not like other rate limiters:**
-
-- ❌ `express-rate-limit` → hardcoded to Express
-- ❌ `rate-limiter-flexible` → imperative, low observability  
-- ❌ `upstash/ratelimit` → Redis only, no flexibility
-- ❌ Others → DIY observability, no analytics, no structured events
-
-### ✅ **Instead:**
-
-- ✅ Works anywhere (`bun`, `edge`, `node`, etc.)
-- ✅ Stores limits wherever you want (Redis, ClickHouse, Memory, BunKV)
-- ✅ Auto-instruments everything with observability
-- ✅ Fully testable and mockable with Effect
-- ✅ Zero-config for 90% of use cases
-
-## 🎯 **Core Goals**
-
-### 1. **Simple for Developers**
-
-```typescript
-import { withRateLimiter } from "better-ratelimit-plugin-elysia"
-
-app.use(withRateLimiter({ key: ctx => ctx.ip }))
+```bash
+bun add better-ratelimit
 ```
 
-Or programmatically:
+## 📚 **Examples**
+
+### **Basic Rate Limiting**
 
 ```typescript
-import { checkRateLimit } from "better-ratelimit-core"
+import { createMemoryRateLimiter } from "better-ratelimit"
 
-const result = await checkRateLimit({
-  key: "ip:1.2.3.4",
+const limiter = createMemoryRateLimiter()
+
+// Check rate limit
+const result = await limiter.check({
+  key: "user:123",
   limit: 10,
   duration: "1m"
 })
+
+if (!result.allowed) {
+  return { error: "Rate limit exceeded", retryAfter: result.resetTime }
+}
 ```
 
-### 2. **Pluggable Adapters**
-
-Storage is abstracted behind a common interface:
-
-- **Redis** for fast limits
-- **ClickHouse** for historical analytics  
-- **Memory** for tests
-- **BunKV** for edge functions
-
-Swap storage with one line:
+### **With Redis**
 
 ```typescript
-import { RedisLayer } from "better-ratelimit-adapter-redis"
+import { createRedisRateLimiter } from "better-ratelimit"
+
+const limiter = createRedisRateLimiter(process.env.REDIS_URL, {
+  prefix: "myapp:ratelimit"
+})
+
+const result = await limiter.check({
+  key: "api:user:123",
+  limit: 100,
+  duration: "1h",
+  strategy: "sliding-window"
+})
 ```
 
-### 3. **Observability-Native**
+### **With Elysia**
 
-Every request automatically logs structured events:
+```typescript
+import { Elysia } from "elysia"
+import { withRateLimiter } from "better-ratelimit"
 
-- Who was limited and when
-- How much quota was used
-- Which backend was used
-- Response times and performance metrics
-
-You can graph it, alert on it, or even bill off it — all out of the box.
-
-### 4. **Layer-First & Testable**
-
-Everything is an Effect `Layer`. That means:
-
-- Composable in real applications
-- Fully testable with mocks
-- Clean dependency encoding
-
-No weird globals. No side effects. Just functional, typed building blocks.
-
-## 🏗️ **Architecture**
-
-```
-better-ratelimit/
-├── core/                    # Pure rate limiting logic
-├── adapter-*/              # Storage backends
-│   ├── redis/
-│   ├── clickhouse/
-│   ├── memory/
-│   └── bunkv/
-├── plugin-*/               # Framework integrations
-│   ├── elysia/
-│   ├── hono/
-│   ├── express/
-│   └── edge/
-└── observability-*/        # Logging & metrics
-    ├── databuddy/
-    ├── console/
-    └── custom/
+const app = new Elysia()
+  .use(withRateLimiter({
+    key: ctx => ctx.ip,
+    limit: 100,
+    duration: "1m",
+    strategy: "fixed-window",
+    headers: {
+      enabled: true,
+      prefix: "X-RateLimit"
+    },
+    response: {
+      status: 429,
+      message: "Too Many Requests"
+    }
+  }))
+  .get("/api/data", () => ({ data: "..." }))
+  .listen(3000)
 ```
 
-### **Core Components**
+### **Custom Key Generation**
 
-#### `better-ratelimit-core`
-- Pure rate limiting algorithms
-- Token bucket, sliding window, fixed window
-- No storage, no logging, no framework assumptions
+```typescript
+import { getIPKey } from "better-ratelimit"
 
-#### `better-ratelimit-adapter-*`
-- Pluggable storage backends
-- Implement shared `RateLimitStore` interface
-- Expose typed `Layer`s for dependency injection
+const result = await limiter.check({
+  key: getIPKey(ctx), // Handles Cloudflare, AWS, Vercel, etc.
+  limit: 50,
+  duration: "5m"
+})
+```
 
-#### `better-ratelimit-plugin-*`
-- Framework integrations
-- Wrap request lifecycle and call the limiter
-- Inject configuration, handle blocking responses
+## 🎯 **Features**
 
-#### `better-ratelimit-observability-*`
-- Log every decision as a structured event
-- Emit metrics and performance data
-- Push to ClickHouse, console, Kafka, etc.
+### **Multiple Storage Backends**
+- **Memory** - Fast, in-memory storage for development
+- **Redis** - Production-ready with Dragonfly/Valkey support
+- **ClickHouse** - Analytics and historical data
+- **BunKV** - Edge function storage (coming soon)
+
+### **Rate Limiting Strategies**
+- **Fixed Window** - Simple, predictable limits
+- **Sliding Window** - Smooth rate limiting
+- **Approximated Sliding Window** - Efficient sliding with sub-windows
+
+### **Framework Integrations**
+- **Elysia** - First-class support
+- **Hono** - Coming soon
+- **Express** - Coming soon
+- **Edge Functions** - Coming soon
+
+### **Observability**
+- **Structured logging** - Every decision logged
+- **Performance metrics** - Response times, throughput
+- **Analytics ready** - Export to ClickHouse, Prometheus, etc.
+
+## 🏗️ **API Reference**
+
+### **RateLimiter**
+
+```typescript
+import { RateLimiter } from "better-ratelimit"
+
+const limiter = new RateLimiter(store, options?)
+
+// Check rate limit
+const result = await limiter.check({
+  key: string
+  limit: number
+  duration: string
+  strategy?: "fixed-window" | "sliding-window" | "approximated-sliding-window"
+  burst?: number
+  prefix?: string
+  metadata?: Record<string, unknown>
+})
+
+// Result
+interface RateLimitResult {
+  allowed: boolean
+  remaining: number
+  resetTime: number
+  limit: number
+  key: string
+  metadata?: Record<string, unknown>
+}
+```
+
+### **Storage Adapters**
+
+```typescript
+// Memory (default)
+import { MemoryStore } from "better-ratelimit"
+const store = new MemoryStore({ maxSize: 1000 })
+
+// Redis
+import { RedisAdapter } from "better-ratelimit"
+const store = new RedisAdapter({ 
+  url: "redis://localhost:6379",
+  prefix: "ratelimit"
+})
+```
+
+### **Framework Plugins**
+
+```typescript
+// Elysia
+import { withRateLimiter } from "better-ratelimit"
+
+app.use(withRateLimiter({
+  key: ctx => ctx.ip,
+  limit: 100,
+  duration: "1m",
+  strategy: "fixed-window",
+  onLimit: (ctx, result) => {
+    // Custom handling
+  }
+}))
+```
 
 ## 🚀 **Quick Start**
 
@@ -244,45 +292,70 @@ import { CustomLayer } from "better-ratelimit-observability-custom"
 ## 🧪 **Testing**
 
 ```typescript
-import { Effect, TestContext } from "effect"
-import { RateLimitCore } from "better-ratelimit-core"
-import { MemoryLayer } from "better-ratelimit-adapter-memory"
+import { describe, it, expect } from "bun:test"
+import { RateLimiter, MemoryStore } from "better-ratelimit"
 
-const testProgram = Effect.gen(function* (_) {
-  const rateLimiter = yield* _(RateLimitCore)
-  
-  const result1 = yield* _(
-    rateLimiter.check({
+describe("Rate Limiting", () => {
+  it("should limit requests correctly", async () => {
+    const limiter = new RateLimiter(new MemoryStore())
+    
+    // First request - allowed
+    const result1 = await limiter.check({
       key: "test:user",
       limit: 2,
       duration: "1m"
     })
-  )
-  
-  const result2 = yield* _(
-    rateLimiter.check({
-      key: "test:user", 
+    expect(result1.allowed).toBe(true)
+    expect(result1.remaining).toBe(1)
+    
+    // Second request - allowed
+    const result2 = await limiter.check({
+      key: "test:user",
       limit: 2,
       duration: "1m"
     })
-  )
-  
-  return { result1, result2 }
+    expect(result2.allowed).toBe(true)
+    expect(result2.remaining).toBe(0)
+    
+    // Third request - blocked
+    const result3 = await limiter.check({
+      key: "test:user",
+      limit: 2,
+      duration: "1m"
+    })
+    expect(result3.allowed).toBe(false)
+    expect(result3.remaining).toBe(0)
+  })
 })
-
-const testRuntime = Layer.provide(
-  Layer.merge(RateLimitCore, MemoryLayer),
-  testProgram
-)
-
-const result = await Effect.runPromise(testRuntime)
-// result.result1.allowed = true
-// result.result2.allowed = false (limit exceeded)
 ```
 
-## 📊 **Observability Events**
+## 🐳 **Development**
 
-Every rate limit decision generates structured events:
+### **Start Databases**
+
+```bash
+# Start Redis, Dragonfly, Valkey, ClickHouse
+docker-compose up -d
+
+# Test all databases
+bun test src/adapters/redis/redis.test.ts
+```
+
+### **Environment Variables**
+
+```bash
+# Copy example
+cp env.example .env
+
+# Configure databases
+REDIS_URL=redis://localhost:6379
+DRAGONFLY_URL=redis://localhost:6380
+VALKEY_URL=redis://localhost:6381
+```
+
+## 📊 **Observability**
+
+Every rate limit decision is automatically logged with structured data:
 
 ```typescript
 interface RateLimitEvent {
@@ -292,8 +365,7 @@ interface RateLimitEvent {
   limit: number
   remaining: number
   resetTime: string
-  duration: string
-  backend: string
+  strategy: string
   responseTime: number
   metadata?: Record<string, unknown>
 }
@@ -301,21 +373,14 @@ interface RateLimitEvent {
 
 ## 🌍 **Framework Support**
 
-- **Elysia** - `better-ratelimit-plugin-elysia`
-- **Hono** - `better-ratelimit-plugin-hono`  
-- **Express** - `better-ratelimit-plugin-express`
-- **Edge Functions** - `better-ratelimit-plugin-edge`
-- **Raw HTTP** - Use core directly
+- **Elysia** ✅ - First-class support
+- **Hono** 🚧 - Coming soon
+- **Express** 🚧 - Coming soon
+- **Edge Functions** 🚧 - Coming soon
 
 ## 🤝 **Contributing**
 
-This project is built with:
-
-- **[Bun](https://bun.sh)** - Fast JavaScript runtime
-- **[Effect](https://effect.website/)** - Functional programming toolkit
-- **[TypeScript](https://www.typescriptlang.org/)** - Type safety
-
-### Development
+Built with **[Bun](https://bun.sh)**, **[Effect](https://effect.website/)**, and **[TypeScript](https://www.typescriptlang.org/)**.
 
 ```bash
 # Install dependencies
@@ -324,8 +389,8 @@ bun install
 # Run tests
 bun test
 
-# Build
-bun run build
+# Start development databases
+docker-compose up -d
 ```
 
 ## 📄 **License**
