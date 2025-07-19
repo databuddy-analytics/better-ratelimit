@@ -39,7 +39,7 @@ describe("Fixed Window Strategy", () => {
             }
         }
 
-        console.log(chalk.gray("\n" + "=".repeat(50)))
+        console.log(chalk.gray(`\n${"=".repeat(50)}`))
         console.log(chalk.green.bold("✅ Fixed window test completed!\n"))
     })
 

@@ -50,7 +50,7 @@ describe("Sliding Window Strategy", () => {
             }
         }
 
-        console.log(chalk.gray("\n" + "=".repeat(50)))
+        console.log(chalk.gray(`\n${"=".repeat(50)}`))
         console.log(chalk.green.bold("✅ Sliding window test completed!\n"))
     })
 

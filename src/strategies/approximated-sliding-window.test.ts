@@ -52,7 +52,7 @@ describe("Approximated Sliding Window Strategy", () => {
             }
         }
 
-        console.log(chalk.gray("\n" + "=".repeat(50)))
+        console.log(chalk.gray(`\n${"=".repeat(50)}`))
         console.log(chalk.green.bold("✅ Approximated sliding window test completed!\n"))
     })
 

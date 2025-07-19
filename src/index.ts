@@ -6,6 +6,7 @@ export type { RateLimitConfig, RateLimitResult, RateLimitStore, RateLimitOptions
 export { RateLimiter, type RateLimiterOptions } from "./core/rate-limiter"
 
 export { MemoryStore, type MemoryStoreOptions } from "./adapters/memory"
+export { RedisAdapter, type RedisAdapterOptions } from "./adapters/redis"
 
 export { withRateLimiter, type ElysiaContext, type ElysiaApp, type ElysiaRateLimitOptions } from "./plugins/elysia"
 
