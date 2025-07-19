@@ -1,4 +1,4 @@
-import type { RateLimitConfig, RateLimitResult, RateLimitStore, RateLimitOptions } from "../types"
+import type { RateLimitResult, RateLimitStore } from "../types"
 import { RateLimiter } from "../core/rate-limiter"
 import { MemoryStore } from "../adapters/memory"
 import { getIPKey, type RequestContext } from "../utils/ip"
@@ -35,7 +35,7 @@ export interface ElysiaRateLimitOptions {
 }
 
 export interface ElysiaApp {
-    onRequest: (handler: (ctx: ElysiaContext) => Promise<string | void>) => ElysiaApp
+    onRequest: (handler: (ctx: ElysiaContext) => Promise<string | undefined>) => ElysiaApp
 }
 
 export function withRateLimiter(options: ElysiaRateLimitOptions) {
