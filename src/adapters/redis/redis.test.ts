@@ -21,7 +21,11 @@ describe("Redis Adapters", () => {
             try {
                 console.log(chalk.cyan(`📊 Testing ${db.name}: ${db.url}`))
                 const adapter = new RedisAdapter({ url: db.url, prefix: `test:${db.name.toLowerCase()}` })
-                const limiter = new RateLimiter(adapter)
+                const limiter = new RateLimiter(adapter, {
+                    limit: 100,
+                    duration: "1m",
+                    strategy: "fixed-window"
+                })
 
                 adapters.push(adapter)
                 limiters.push(limiter)
@@ -64,10 +68,7 @@ describe("Redis Adapters", () => {
                 console.log()
 
                 for (let j = 1; j <= 5; j++) {
-                    const result = await limiter.check({
-                        ...config,
-                        strategy: "fixed-window"
-                    })
+                    const result = await limiter.check(config.key)
 
                     const status = result.allowed ? chalk.green("✅ ALLOWED") : chalk.red("❌ BLOCKED")
 

@@ -4,12 +4,14 @@ import { parseDuration } from "../utils/duration"
 import { getStrategy, type StrategyName } from "../strategies"
 
 export interface RateLimiterOptions {
-    defaultStrategy?: StrategyName
-    defaultBurst?: number
-    defaultPrefix?: string
+    limit: number
+    duration: string
+    strategy?: StrategyName
+    burst?: number
+    prefix?: string
+    metadata?: Record<string, unknown>
     onLimit?: (result: RateLimitResult) => void
     onSuccess?: (result: RateLimitResult) => void
-    metadata?: Record<string, unknown>
 }
 
 export class RateLimiter {
@@ -17,38 +19,34 @@ export class RateLimiter {
 
     constructor(
         private store: RateLimitStore,
-        options: RateLimiterOptions = {}
+        options: RateLimiterOptions
     ) {
         this.options = {
-            defaultStrategy: "fixed-window",
-            defaultBurst: 0,
-            defaultPrefix: "rate-limit",
+            strategy: "fixed-window",
+            burst: 0,
+            prefix: "",
+            metadata: {},
             onLimit: () => { },
             onSuccess: () => { },
-            metadata: {},
             ...options
         }
     }
 
-    async check(config: RateLimitConfig): Promise<RateLimitResult> {
-        const ttl = parseDuration(config.duration)
-        const current = await this.store.increment(config.key, ttl)
+    async check(key: string): Promise<RateLimitResult> {
+        const ttl = parseDuration(this.options.duration)
+        const current = await this.store.increment(key, ttl)
 
-        const strategyName = config.strategy || this.options.defaultStrategy
-        const strategy = Effect.runSync(getStrategy(strategyName))
+        const strategy = Effect.runSync(getStrategy(this.options.strategy))
 
         const result = strategy.check(current, {
-            ...config,
-            strategy: strategyName
+            key,
+            limit: this.options.limit,
+            duration: this.options.duration,
+            strategy: this.options.strategy,
+            burst: this.options.burst,
+            prefix: this.options.prefix,
+            metadata: this.options.metadata
         })
-
-        result.metadata = {
-            ...this.options.metadata,
-            ...config.metadata,
-            strategy: strategyName,
-            burst: config.burst || this.options.defaultBurst,
-            prefix: config.prefix || this.options.defaultPrefix
-        }
 
         if (result.allowed) {
             this.options.onSuccess(result)
@@ -57,28 +55,6 @@ export class RateLimiter {
         }
 
         return result
-    }
-
-    async checkWithOptions(options: RateLimitOptions, key: string): Promise<RateLimitResult> {
-        return this.check({
-            key,
-            limit: options.limit,
-            duration: options.duration,
-            strategy: options.strategy || this.options.defaultStrategy,
-            burst: options.burst || this.options.defaultBurst,
-            prefix: options.prefix || this.options.defaultPrefix,
-            metadata: {
-                ...this.options.metadata,
-                ...options.metadata
-            }
-        })
-    }
-
-    async checkWithStrategy(strategyName: StrategyName, config: RateLimitConfig): Promise<RateLimitResult> {
-        return this.check({
-            ...config,
-            strategy: strategyName
-        })
     }
 
     withStore(store: RateLimitStore): RateLimiter {
@@ -90,7 +66,7 @@ export class RateLimiter {
     }
 
     withStrategy(strategyName: StrategyName): RateLimiter {
-        return new RateLimiter(this.store, { ...this.options, defaultStrategy: strategyName })
+        return new RateLimiter(this.store, { ...this.options, strategy: strategyName })
     }
 
     updateOptions(newOptions: Partial<RateLimiterOptions>): void {
@@ -99,5 +75,30 @@ export class RateLimiter {
 
     getOptions(): RateLimiterOptions {
         return { ...this.options }
+    }
+
+    async isAllowed(key: string): Promise<boolean> {
+        const result = await this.check(key)
+        return result.allowed
+    }
+
+    async getRemaining(key: string): Promise<number> {
+        const result = await this.check(key)
+        return result.remaining
+    }
+
+    async getResetTime(key: string): Promise<number> {
+        const result = await this.check(key)
+        return result.resetTime
+    }
+
+    async getInfo(key: string): Promise<{ allowed: boolean; remaining: number; resetTime: number; limit: number }> {
+        const result = await this.check(key)
+        return {
+            allowed: result.allowed,
+            remaining: result.remaining,
+            resetTime: result.resetTime,
+            limit: result.limit
+        }
     }
 } 

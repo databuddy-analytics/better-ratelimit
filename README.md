@@ -12,42 +12,216 @@
 bun add better-ratelimit
 ```
 
-## 📚 **Examples**
+## 📚 **Real-World Examples**
 
-### **Basic Rate Limiting**
-
-```typescript
-import { createMemoryRateLimiter } from "better-ratelimit"
-
-const limiter = createMemoryRateLimiter()
-
-// Check rate limit
-const result = await limiter.check({
-  key: "user:123",
-  limit: 10,
-  duration: "1m"
-})
-
-if (!result.allowed) {
-  return { error: "Rate limit exceeded", retryAfter: result.resetTime }
-}
-```
-
-### **With Redis**
+### **1. API Rate Limiting**
 
 ```typescript
 import { createRedisRateLimiter } from "better-ratelimit"
 
-const limiter = createRedisRateLimiter(process.env.REDIS_URL, {
-  prefix: "myapp:ratelimit"
-})
+// API endpoint rate limiting: 100 requests per hour per user
+const apiLimiter = createRedisRateLimiter(
+  process.env.REDIS_URL,
+  100,
+  "1h",
+  { 
+    prefix: "api:ratelimit",
+    strategy: "sliding-window"
+  }
+)
 
-const result = await limiter.check({
-  key: "api:user:123",
-  limit: 100,
-  duration: "1h",
-  strategy: "sliding-window"
-})
+// In your API route handler
+async function handleApiRequest(userId: string) {
+  const result = await apiLimiter.check(`user:${userId}`)
+  
+  if (!result.allowed) {
+    return {
+      error: "Rate limit exceeded",
+      retryAfter: new Date(result.resetTime).toISOString(),
+      remaining: result.remaining
+    }
+  }
+  
+  // Process the request...
+  return { success: true, remaining: result.remaining }
+}
+```
+
+### **2. Login Attempt Protection**
+
+```typescript
+import { createRedisRateLimiter } from "better-ratelimit"
+
+// Login protection: 5 attempts per 15 minutes per IP
+const loginLimiter = createRedisRateLimiter(
+  process.env.REDIS_URL,
+  5,
+  "15m",
+  { 
+    prefix: "login:ratelimit",
+    strategy: "fixed-window"
+  }
+)
+
+// In your login endpoint
+async function handleLogin(ip: string, email: string) {
+  const result = await loginLimiter.check(`ip:${ip}`)
+  
+  if (!result.allowed) {
+    return {
+      error: "Too many login attempts",
+      retryAfter: new Date(result.resetTime).toISOString()
+    }
+  }
+  
+  // Attempt login...
+  return { success: true }
+}
+```
+
+### **3. File Upload Limiting**
+
+```typescript
+import { createMemoryRateLimiter } from "better-ratelimit"
+
+// File upload: 10 files per day per user
+const uploadLimiter = createMemoryRateLimiter(10, "24h")
+
+// In your upload handler
+async function handleFileUpload(userId: string) {
+  const result = await uploadLimiter.check(`upload:${userId}`)
+  
+  if (!result.allowed) {
+    return {
+      error: "Upload limit reached",
+      remaining: result.remaining,
+      resetDate: new Date(result.resetTime).toLocaleDateString()
+    }
+  }
+  
+  // Process upload...
+  return { success: true, remaining: result.remaining }
+}
+```
+
+### **4. Webhook Rate Limiting**
+
+```typescript
+import { createRedisRateLimiter } from "better-ratelimit"
+
+// Webhook delivery: 1000 calls per hour per webhook
+const webhookLimiter = createRedisRateLimiter(
+  process.env.REDIS_URL,
+  1000,
+  "1h",
+  { 
+    prefix: "webhook:ratelimit",
+    strategy: "approximated-sliding-window"
+  }
+)
+
+// In your webhook sender
+async function sendWebhook(webhookId: string, payload: any) {
+  const result = await webhookLimiter.check(`webhook:${webhookId}`)
+  
+  if (!result.allowed) {
+    console.log(`Webhook ${webhookId} rate limited, will retry later`)
+    return { queued: true }
+  }
+  
+  // Send webhook...
+  return { sent: true, remaining: result.remaining }
+}
+```
+
+### **5. Helper Methods & Common Patterns**
+
+```typescript
+import { createRedisRateLimiter } from "better-ratelimit"
+
+const limiter = createRedisRateLimiter(process.env.REDIS_URL, 100, "1h")
+
+// Simple boolean check
+if (await limiter.isAllowed("user:123")) {
+  // Process request
+}
+
+// Get remaining requests
+const remaining = await limiter.getRemaining("user:123")
+console.log(`${remaining} requests remaining`)
+
+// Get reset time
+const resetTime = await limiter.getResetTime("user:123")
+console.log(`Resets at ${new Date(resetTime).toISOString()}`)
+
+// Get all info at once
+const info = await limiter.getInfo("user:123")
+if (!info.allowed) {
+  return {
+    error: "Rate limit exceeded",
+    remaining: info.remaining,
+    retryAfter: new Date(info.resetTime).toISOString()
+  }
+}
+```
+
+### **6. Middleware Pattern**
+
+```typescript
+import { createRedisRateLimiter } from "better-ratelimit"
+
+const apiLimiter = createRedisRateLimiter(process.env.REDIS_URL, 100, "1h")
+
+// Express-style middleware
+async function rateLimitMiddleware(req: any, res: any, next: any) {
+  const key = `user:${req.userId}`
+  
+  if (!(await apiLimiter.isAllowed(key))) {
+    const info = await apiLimiter.getInfo(key)
+    return res.status(429).json({
+      error: "Rate limit exceeded",
+      retryAfter: new Date(info.resetTime).toISOString(),
+      remaining: info.remaining
+    })
+  }
+  
+  next()
+}
+```
+
+### **7. Better Error Handling**
+
+```typescript
+import { createRedisRateLimiter } from "better-ratelimit"
+
+const limiter = createRedisRateLimiter(process.env.REDIS_URL, 100, "1h")
+
+// Utility function for consistent error responses
+function createRateLimitError(result: any) {
+  return {
+    error: "Rate limit exceeded",
+    retryAfter: new Date(result.resetTime).toISOString(),
+    remaining: result.remaining,
+    limit: result.limit,
+    resetTime: result.resetTime
+  }
+}
+
+// In your API handler
+async function handleApiRequest(userId: string) {
+  const result = await limiter.check(`user:${userId}`)
+  
+  if (!result.allowed) {
+    return createRateLimitError(result)
+  }
+  
+  // Process request...
+  return { 
+    success: true, 
+    remaining: result.remaining,
+    resetTime: new Date(result.resetTime).toISOString()
+  }
+}
 ```
 
 ### **With Elysia**
@@ -73,6 +247,32 @@ const app = new Elysia()
   }))
   .get("/api/data", () => ({ data: "..." }))
   .listen(3000)
+```
+
+### **With Hono**
+
+```typescript
+import { Hono } from "hono"
+import { withHonoRateLimiter } from "better-ratelimit"
+
+const app = new Hono()
+
+app.use(withHonoRateLimiter({
+  key: ctx => ctx.req.header("x-user-id") || "anonymous",
+  limit: 100,
+  duration: "1m",
+  strategy: "sliding-window",
+  headers: {
+    enabled: true,
+    prefix: "X-RateLimit"
+  },
+  response: {
+    status: 429,
+    message: "Too Many Requests"
+  }
+}))
+
+app.get("/api/data", (c) => c.json({ data: "..." }))
 ```
 
 ### **Custom Key Generation**
@@ -113,23 +313,53 @@ const result = await limiter.check({
 
 ## 🏗️ **API Reference**
 
+### **Improved API Design**
+
+The API is designed to be **intuitive and practical**:
+
+```typescript
+import { RateLimiter } from "better-ratelimit"
+
+// ✅ Configure once, use many times
+const limiter = new RateLimiter(store, {
+  limit: 100,
+  duration: "1m",
+  strategy: "fixed-window"
+})
+
+// ✅ Simple check - just pass the key
+const result = await limiter.check("user:123")
+
+// ✅ Helper methods for common patterns
+if (await limiter.isAllowed("user:123")) {
+  // Process request
+}
+
+const remaining = await limiter.getRemaining("user:123")
+const info = await limiter.getInfo("user:123")
+```
+
+### **Why This Design?**
+
+- **🎯 Configure Once**: Set limits, duration, strategy at initialization
+- **🚀 Simple Usage**: Just pass the key to check
+- **🛠️ Helper Methods**: Common patterns like `isAllowed()`, `getRemaining()`
+- **📊 Rich Results**: Full information about rate limit status
+- **🔄 Consistent**: Same behavior across all checks
+
 ### **RateLimiter**
 
 ```typescript
 import { RateLimiter } from "better-ratelimit"
 
-const limiter = new RateLimiter(store, options?)
+const limiter = new RateLimiter(store, {
+  limit: 100,
+  duration: "1m",
+  strategy: "fixed-window"
+})
 
 // Check rate limit
-const result = await limiter.check({
-  key: string
-  limit: number
-  duration: string
-  strategy?: "fixed-window" | "sliding-window" | "approximated-sliding-window"
-  burst?: number
-  prefix?: string
-  metadata?: Record<string, unknown>
-})
+const result = await limiter.check("user:123")
 
 // Result
 interface RateLimitResult {

@@ -41,6 +41,8 @@ export interface ElysiaApp {
 export function withRateLimiter(options: ElysiaRateLimitOptions) {
     const store = options.store || new MemoryStore()
     const rateLimiter = new RateLimiter(store, {
+        limit: options.limit,
+        duration: options.duration,
         onLimit: () => { },
         onSuccess: () => { },
         metadata: options.metadata
@@ -64,15 +66,7 @@ export function withRateLimiter(options: ElysiaRateLimitOptions) {
         return app.onRequest(async (ctx: ElysiaContext) => {
             const key = options.key ? options.key(ctx) : getIPKey(ctx)
 
-            const result = await rateLimiter.check({
-                key,
-                limit: options.limit,
-                duration: options.duration,
-                strategy: options.strategy,
-                burst: options.burst,
-                prefix: options.prefix,
-                metadata: options.metadata
-            })
+            const result = await rateLimiter.check(key)
 
             if (headerOptions.enabled) {
                 const prefix = headerOptions.prefix
