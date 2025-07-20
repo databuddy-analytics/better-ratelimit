@@ -1,56 +1,26 @@
 {
-  "name": "better-ratelimit",
-  "version": "0.2.4",
-  "description": "A framework-agnostic, Effect-powered, observability-native rate limiter designed for real-world infrastructure",
-  "main": "dist/index.js",
-  "module": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    }
-  },
-  "files": [
-    "dist"
-  ],
-  "type": "module",
-  "keywords": [
-    "rate-limit",
-    "rate-limiting",
-    "effect",
-    "typescript",
-    "bun",
-    "observability",
-    "redis",
-    "clickhouse",
-    "elysia",
-    "hono",
-    "express"
-  ],
-  "author": "Databuddy Corp",
-  "license": "MIT",
-  "scripts": {
-    "dev": "bun run index.ts",
-    "build": "tsc",
-    "test": "bun test",
-    "typecheck": "tsc --noEmit",
-    "prepublishOnly": "bun run build"
-  },
-  "devDependencies": {
-    "@types/bun": "latest",
-    "chalk": "^5.4.1"
-  },
-  "peerDependencies": {
-    "typescript": "^5"
-  },
-  "dependencies": {
-    "@biomejs/biome": "^2.1.2",
-    "@redis/client": "^5.6.0",
-    "@upstash/redis": "^1.35.1",
-    "effect": "^3.16.16",
-    "elysia": "^1.3.5",
-    "hono": "^4.8.5",
-    "lru-cache": "^11.1.0"
-  }
+    "name": "better-ratelimit",
+    "version": "0.2.4",
+    "description": "A framework-agnostic, Effect-powered, observability-native rate limiter designed for real-world infrastructure",
+    "private": true,
+    "workspaces": [
+        "apps/*",
+        "packages/*"
+    ],
+    "scripts": {
+        "build": "turbo run build",
+        "dev": "turbo run dev",
+        "test": "turbo run test",
+        "typecheck": "turbo run typecheck",
+        "lint": "turbo run lint",
+        "clean": "turbo run clean",
+        "format": "biome format --write .",
+        "check": "biome check ."
+    },
+    "devDependencies": {
+        "@biomejs/biome": "^2.1.2",
+        "turbo": "^2.1.0",
+        "typescript": "^5.8.3"
+    },
+    "packageManager": "bun@1.0.0"
 }

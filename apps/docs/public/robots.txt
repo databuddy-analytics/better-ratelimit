@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://www.databuddy.cc/sitemap.xml
+ 
+# SEO optimization for documentation
+Crawl-delay: 1 
