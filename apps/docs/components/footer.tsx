@@ -1,69 +1,74 @@
-import { Mail, MessageCircle, Github, Twitter, Home } from 'lucide-react';
-import { LogoContent } from './logo';
+import Link from "next/link";
+import { Github, Twitter, Mail, ExternalLink } from "lucide-react";
+import Logo from "./logo";
 
-export function Footer() {
+export default function Footer() {
     return (
-        <footer className="border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-            <div className="container mx-auto px-4 py-8">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                    <div className="space-y-3">
-                        <LogoContent />
-                        <p className="text-sm text-muted-foreground">
-                            Privacy-first web analytics without compromising user data.
-                        </p>
-                    </div>
-
-                    <div className="space-y-3">
-                        <h3 className="font-semibold">Product</h3>
-                        <ul className="space-y-2 text-sm">
-                            <li><a href="/docs" className="text-muted-foreground hover:text-foreground">Documentation</a></li>
-                            <li><a href="/pricing" className="text-muted-foreground hover:text-foreground">Pricing</a></li>
-                            <li><a href="https://app.databuddy.cc" className="text-muted-foreground hover:text-foreground">Dashboard</a></li>
-                        </ul>
-                    </div>
-
-                    <div className="space-y-3">
-                        <h3 className="font-semibold">Company</h3>
-                        <ul className="space-y-2 text-sm">
-                            <li><a href="/blog" className="text-muted-foreground hover:text-foreground">Blog</a></li>
-                            <li><a href="/privacy" className="text-muted-foreground hover:text-foreground">Privacy</a></li>
-                            <li><a href="/terms" className="text-muted-foreground hover:text-foreground">Terms</a></li>
-                        </ul>
-                    </div>
-
-                    <div className="space-y-3">
-                        <h3 className="font-semibold">Contact</h3>
-                        <ul className="space-y-2 text-sm">
-                            <li>
-                                <a href="mailto:support@databuddy.cc" className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
-                                    <Mail className="h-4 w-4" />
-                                    support@databuddy.cc
+        <footer className="border-t border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div className="py-16">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
+                        {/* Brand */}
+                        <div className="col-span-1 md:col-span-3">
+                            <Logo />
+                            <p className="mt-6 text-base text-muted-foreground max-w-lg leading-relaxed">
+                                Universal, type-safe, adapter-based rate limiting for every runtime.
+                                Build better APIs with confidence.
+                            </p>
+                            <div className="mt-6 flex items-center gap-4">
+                                <a
+                                    href="https://github.com/databuddy-analytics/better-ratelimit"
+                                    className="group p-3 rounded-xl bg-muted/50 hover:bg-muted border border-border/50 hover:border-border transition-all duration-200"
+                                    aria-label="GitHub"
+                                >
+                                    <Github className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
                                 </a>
-                            </li>
-                            <li>
-                                <a href="https://discord.gg/JTk7a38tCZ" className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
-                                    <MessageCircle className="h-4 w-4" />
-                                    Discord
+                                <a
+                                    href="https://x.com/betterratelimit"
+                                    className="group p-3 rounded-xl bg-muted/50 hover:bg-muted border border-border/50 hover:border-border transition-all duration-200"
+                                    aria-label="Twitter"
+                                >
+                                    <Twitter className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
                                 </a>
-                            </li>
-                        </ul>
-                        <div className="flex gap-2 pt-2">
-                            <a href="https://github.com/databuddy-analytics" className="p-2 rounded bg-muted hover:bg-muted/80" aria-label="GitHub">
-                                <Github className="h-4 w-4" />
-                            </a>
-                            <a href="https://x.com/trydatabuddy" className="p-2 rounded bg-muted hover:bg-muted/80" aria-label="Twitter">
-                                <Twitter className="h-4 w-4" />
-                            </a>
-                            <a href="https://app.databuddy.cc" className="p-2 rounded bg-muted hover:bg-muted/80" aria-label="Dashboard">
-                                <Home className="h-4 w-4" />
-                            </a>
+                                <a
+                                    href="mailto:support@better-ratelimit.com"
+                                    className="group p-3 rounded-xl bg-muted/50 hover:bg-muted border border-border/50 hover:border-border transition-all duration-200"
+                                    aria-label="Email"
+                                >
+                                    <Mail className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
+                                </a>
+                            </div>
+                        </div>
+
+                        {/* Company Links */}
+                        <div>
+                            <h3 className="text-sm font-semibold text-foreground mb-6 uppercase tracking-wider">Contact</h3>
+                            <ul className="space-y-4 text-sm">
+                                <li>
+                                    <a
+                                        href="mailto:support@better-ratelimit.com"
+                                        className="text-muted-foreground hover:text-foreground transition-colors duration-200 flex items-center gap-2 group"
+                                    >
+                                        <Mail className="h-4 w-4" />
+                                        Contact Support
+                                    </a>
+                                </li>
+                            </ul>
                         </div>
                     </div>
-                </div>
 
-                <div className="border-t border-border mt-6 pt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
-                    <p className="text-sm text-muted-foreground">© {new Date().getFullYear()} Databuddy</p>
-                    <p className="text-sm text-muted-foreground">Privacy-first analytics</p>
+                    {/* Bottom */}
+                    <div className="mt-12 pt-8 border-t border-border/50 flex flex-col md:flex-row items-center justify-between gap-6">
+                        <p className="text-sm text-muted-foreground">
+                            © {new Date().getFullYear()} better-ratelimit. All rights reserved.
+                        </p>
+                        <div className="flex items-center gap-6 text-xs text-muted-foreground">
+                            <span className="flex items-center gap-2">
+                                <div className="w-1.5 h-1.5 bg-primary rounded-full" />
+                                MIT licensed
+                            </span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </footer>

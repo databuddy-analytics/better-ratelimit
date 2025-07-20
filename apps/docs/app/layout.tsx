@@ -1,50 +1,41 @@
-import './global.css';
-import { RootProvider } from 'fumadocs-ui/provider';
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import { cn } from "@/lib/utils";
 import { ThemeProvider } from "next-themes";
-import { Databuddy } from '@databuddy/sdk';
-import type { ReactNode } from 'react';
-import type { Metadata, Viewport } from "next";
-import { Geist } from 'next/font/google';
-import Script from 'next/script';
-import { Footer } from '@/components/footer';
+import { Navbar } from "@/components/navbar";
+import Footer from "@/components/footer";
+import "./global.css";
 
 const geist = Geist({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  variable: '--font-geist'
+  subsets: ["latin"],
+  variable: "--font-geist",
+});
+
+const geistMono = Geist_Mono({
+  subsets: ["latin"],
+  variable: "--font-geist-mono",
 });
 
 export const metadata: Metadata = {
-  title: "Databuddy - Privacy-First Web Analytics",
-  description: "Experience powerful, privacy-first analytics that matches Google Analytics feature-for-feature without compromising user data. Zero cookies required, 100% data ownership, and AI-powered insights to help your business grow while staying compliant.",
-  keywords: ["analytics", "web analytics", "privacy", "GDPR compliant", "cookieless", "website tracking", "data ownership", "performance analytics", "AI analytics", "privacy-first"],
-  authors: [{ name: "Databuddy Team" }],
-  creator: "Databuddy",
-  publisher: "Databuddy",
-  metadataBase: new URL("https://www.databuddy.cc"),
+  title: "better-ratelimit - Universal Rate Limiting for Every Runtime",
+  description: "Universal, type-safe, adapter-based rate limiting for every runtime. Build better APIs with confidence.",
+  authors: [{ name: "better-ratelimit Team" }],
+  creator: "better-ratelimit",
+  publisher: "better-ratelimit",
+  metadataBase: new URL("https://better-ratelimit.com"),
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://www.databuddy.cc",
-    title: "Databuddy - Privacy-First Web Analytics",
-    description: "Experience powerful, privacy-first analytics that matches Google Analytics feature-for-feature without compromising user data. Zero cookies required, 100% data ownership, and AI-powered insights to help your business grow while staying compliant.",
-    siteName: "Databuddy",
-    images: [
-      {
-        url: "og.webp",
-        width: 1200,
-        height: 630,
-        alt: "Databuddy Dashboard"
-      }
-    ]
+    url: "https://better-ratelimit.com",
+    title: "better-ratelimit - Universal Rate Limiting for Every Runtime",
+    description: "Universal, type-safe, adapter-based rate limiting for every runtime. Build better APIs with confidence.",
+    siteName: "better-ratelimit",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Databuddy - Privacy-First Web Analytics",
-    description: "Experience powerful, privacy-first analytics that matches Google Analytics feature-for-feature without compromising user data. Zero cookies required, 100% data ownership, and AI-powered insights to help your business grow while staying compliant.",
-    images: ["og.webp"],
-    creator: "@databuddyps",
-    site: "@databuddyps"
+    title: "better-ratelimit - Universal Rate Limiting for Every Runtime",
+    description: "Universal, type-safe, adapter-based rate limiting for every runtime. Build better APIs with confidence.",
+    creator: "@betterratelimit",
   },
   robots: {
     index: true,
@@ -57,41 +48,33 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
-  alternates: {
-    canonical: "https://www.databuddy.cc",
-  },
 };
 
-export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "white" },
-    { media: "(prefers-color-scheme: dark)", color: "#0f172a" },
-  ],
-  width: "device-width",
-  initialScale: 1,
-  userScalable: true,
-};
-
-export default function Layout({ children }: { children: ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <html lang="en" className={geist.className} suppressHydrationWarning>
-      <Script src="https://cdn.databuddy.cc/databuddy.js" strategy="afterInteractive" async
-        data-client-id="OXmNQsViBT-FOS_wZCTHc"
-        data-track-attributes={true}
-        data-track-errors={true}
-        data-track-outgoing-links={true}
-        data-track-web-vitals={true}
-      />
-      <body className="flex flex-col min-h-screen">
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <RootProvider >
-            <div className="flex flex-col min-h-screen">
-              <main className="flex-1">
-                {children}
-              </main>
-              <Footer />
-            </div>
-          </RootProvider>
+    <html lang="en" suppressHydrationWarning>
+      <body
+        className={cn(
+          "min-h-screen bg-background font-sans antialiased",
+          geist.variable,
+          geistMono.variable
+        )}
+      >
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <div className="relative flex min-h-screen flex-col">
+            <Navbar />
+            <main className="flex-1">{children}</main>
+            <Footer />
+          </div>
         </ThemeProvider>
       </body>
     </html>

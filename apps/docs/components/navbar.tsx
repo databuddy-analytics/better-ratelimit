@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { NavLink } from "./nav-link";
-import { Logo } from "./logo";
+import Logo from "./logo";
 
 export const Navbar = () => {
 	const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -32,7 +32,7 @@ export const Navbar = () => {
 									</NavLink>
 								))}
 								<NavLink
-									href="https://github.com/databuddy-analytics"
+									href="https://github.com/databuddy-analytics/better-ratelimit"
 									className="bg-muted/30 hover:bg-muted/50 border border-border/30 hover:border-border/50 transition-all duration-200"
 									external
 								>
@@ -55,6 +55,7 @@ export const Navbar = () => {
 
 						{/* Mobile Burger Menu Button */}
 						<button
+							type="button"
 							onClick={toggleMobileMenu}
 							className="md:hidden p-2.5 rounded-lg hover:bg-muted/50 active:bg-muted/70 transition-all duration-200 relative group border border-transparent hover:border-border/30"
 							aria-label="Toggle mobile menu"
@@ -101,7 +102,7 @@ export const Navbar = () => {
 							</Link>
 						))}
 						<Link
-							href="https://github.com/databuddy-analytics"
+							href="https://github.com/databuddy-analytics/better-ratelimit"
 							className={`flex items-center gap-3 px-4 py-3 rounded-lg text-base font-medium hover:bg-muted/50 active:bg-muted/70 transition-all duration-200 transform hover:translate-x-1 border border-border/30 hover:border-border/50 focus:outline-none focus:ring-2 focus:ring-primary/20 ${isMobileMenuOpen
 								? 'translate-x-0 opacity-100'
 								: '-translate-x-4 opacity-0'
@@ -139,22 +140,6 @@ export const navMenu = [
 	{
 		name: "Home",
 		path: "/",
+		external: false,
 	},
-	{
-		name: "Docs",
-		path: "/docs",
-	},
-	{
-		name: "Blog",
-		path: "/blog",
-	},
-	{
-		name: "Privacy",
-		path: "/privacy",
-	},
-	{
-		name: "Dashboard",
-		path: "https://app.databuddy.cc",
-		external: true,
-	}
 ]; 

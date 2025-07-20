@@ -13,35 +13,34 @@ import {
 	BarChart3,
 	Code,
 	Package,
+	CheckCircle,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import Testimonials from "./landing/testimonials";
-import LiquidChrome from "./bits/liquid";
 
 const whyWeExist = [
 	{
 		id: 1,
-		label: "Bloated and creepy",
-		title: "Most analytics tools are either <strong>bloated and creepy</strong> (hi Google)",
+		label: "Runtime limitations",
+		title: "Most rate limiters <strong>only work in one environment</strong>",
 		description:
-			"Google Analytics tracks everything, slows down your site, and requires cookie banners that hurt conversion rates.",
+			"Express rate limiters don't work in edge functions. Cloudflare rate limiters don't work in Node.js. You need different solutions for different environments.",
 		icon: AlertTriangle,
 	},
 	{
 		id: 2,
-		label: "Minimal but useless",
-		title: "Or <strong>minimal but useless</strong> (hi SimpleAnalytics)",
+		label: "Vendor lock-in",
+		title: "Platform-specific solutions <strong>tie you to one vendor</strong>",
 		description:
-			"Simple tools give you basic pageviews but lack the depth developers need to make informed decisions about their products.",
+			"Once you build with a platform-specific rate limiter, you're stuck. Migrating to a different platform means rewriting your rate limiting logic.",
 		icon: BarChart3,
 	},
 	{
 		id: 3,
-		label: "Complex product analytics",
-		title: "Or \"product analytics\" platforms that need <strong>a data team to set up</strong> (hi PostHog)",
+		label: "Poor developer experience",
+		title: "Most solutions lack <strong>proper TypeScript support</strong>",
 		description:
-			"Enterprise tools are powerful but require dedicated data engineers and complex setup processes that small teams can't handle.",
+			"Without good types, you spend more time debugging than building. Runtime errors that could be caught at compile time.",
 		icon: Users,
 	},
 ];
@@ -49,51 +48,51 @@ const whyWeExist = [
 const whatYouGet = [
 	{
 		id: 4,
-		label: "Privacy-First Approach",
-		title: "Build trust & reduce legal risk with built-in <strong>GDPR/CCPA compliance</strong>.",
+		label: "Adapter-based by design",
+		title: "Drop in Redis, LRU, Bun KV, or write your own custom adapter. <strong>No vendor lock-in, no assumptions.</strong>",
 		description:
-			"No cookies required, complete data anonymization, and full GDPR/CCPA compliance out of the box. Build user trust while staying compliant.",
+			"Choose the storage backend that fits your infrastructure. From in-memory for development to Redis for production scale.",
 		icon: Shield,
 	},
 	{
 		id: 5,
-		label: "Real-time Analytics",
-		title: "Make data-driven decisions instantly with <strong>live dashboards</strong>.",
+		label: "Works everywhere",
+		title: "Supports Node.js, Bun, Edge runtimes like Cloudflare Workers and Vercel Edge Functions. <strong>No hacks required.</strong>",
 		description:
-			"See your data update in real-time with beautiful dashboards. No data sampling means 100% accurate data for confident decision making.",
+			"Universal runtime support means you can use the same code across different environments without modification.",
 		icon: TrendingUp,
 	},
 	{
 		id: 6,
-		label: "Data Ownership",
-		title: "Full control of your <strong>valuable business data</strong>.",
+		label: "Precise algorithms",
+		title: "Use sliding window counters, leaky bucket, or token bucket algorithms. <strong>Choose performance vs accuracy.</strong>",
 		description:
-			"Your data stays yours. Export raw data, integrate with existing tools, and maintain complete control over your analytics.",
-		icon: Users,
+			"Different algorithms for different use cases. Sliding window for accuracy, fixed window for performance.",
+		icon: Zap,
 	},
 	{
 		id: 7,
-		label: "Energy Efficient",
-		title: "Up to 10x more eco-friendly with <strong>lower carbon footprint</strong>.",
+		label: "Type-safe configuration",
+		title: "Everything is strongly typed from setup to enforcement. <strong>Get full IntelliSense in any modern editor.</strong>",
 		description:
-			"Reduce your environmental impact with our energy-efficient analytics platform while maintaining powerful insights.",
+			"Full TypeScript support with comprehensive type definitions. Catch errors at compile time, not runtime.",
 		icon: Globe2Icon,
 	},
 	{
 		id: 8,
-		label: "100% Transparency",
-		title: "Fully transparent, <strong>no hidden fees or data games</strong>.",
+		label: "Smart namespacing",
+		title: "Rate limit by user ID, IP, API key, or scoped actions. <strong>Compose keys however you want.</strong>",
 		description:
-			"Clear pricing, open about what data we collect, and honest about our limitations. No vendor lock-in, export your data anytime, and only pay for what you actually use.",
+			"Flexible key generation allows you to rate limit by any criteria. Perfect for complex multi-tenant applications.",
 		icon: Code,
 	},
 	{
 		id: 9,
-		label: "Lightweight",
-		title: "Lightweight, <strong>no cookies, no fingerprinting, no consent needed</strong>.",
+		label: "Minimal footprint",
+		title: "Zero-dependency core. <strong>Small bundle. Ideal for cold starts and serverless runtimes.</strong>",
 		description:
-			"Databuddy is lightweight, no cookies, no fingerprinting, no consent needed. It's GDPR compliant out of the box.",
-		icon: Code,
+			"Tiny bundle size and zero dependencies make it perfect for edge functions and serverless environments.",
+		icon: Package,
 	}
 ];
 
@@ -103,21 +102,21 @@ interface FeaturesProps {
 
 export default function Features({ stars }: FeaturesProps) {
 	return (
-		<div className="md:w-10/12 mx-auto font-geist relative md:border-l-0 md:border-b-0 md:border-[1.2px] border-border rounded-none -pr-2 bg-background/95">
+		<div className="md:w-10/12 mx-auto font-geist relative md:border-l-0 md:border-b-0 md:border-[1.2px] border-border rounded-none -pr-2 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
 			<div className="w-full md:mx-0">
 				{/* Why We Exist Section */}
-				<div className="border-l-[1.2px] border-t-[1.2px] border-border md:border-t-0 p-10 pb-2">
-					<div className="flex items-center gap-2 my-1">
-						<AlertTriangle className="w-4 h-4 text-muted-foreground" />
-						<p className="text-muted-foreground">
-							Why We Exist
+				<div className="border-l-[1.2px] border-t-[1.2px] border-border md:border-t-0 p-12 pb-6">
+					<div className="flex items-center gap-3 my-2">
+						<AlertTriangle className="w-5 h-5 text-red-500" />
+						<p className="text-muted-foreground font-medium">
+							The Problem
 						</p>
 					</div>
-					<div className="mt-2">
+					<div className="mt-4">
 						<div className="max-w-full">
 							<div className="flex gap-3">
-								<p className="max-w-lg text-xl font-normal tracking-tighter md:text-2xl text-foreground">
-									Most analytics tools are either:
+								<p className="max-w-lg text-2xl font-normal tracking-tighter md:text-3xl text-foreground">
+									Building rate limiting that works everywhere is hard
 								</p>
 							</div>
 						</div>
@@ -133,16 +132,16 @@ export default function Features({ stars }: FeaturesProps) {
 						<div
 							key={item.id}
 							className={cn(
-								"justify-center border-l-[1.2px] border-border md:min-h-[240px] border-t-[1.2px] md:border-t-0 transform-gpu flex flex-col p-10",
+								"justify-center border-l-[1.2px] border-border md:min-h-[280px] border-t-[1.2px] md:border-t-0 transform-gpu flex flex-col p-12 hover:bg-muted/30 transition-colors duration-200",
 							)}
 						>
-							<div className="flex items-center gap-2 my-1">
-								<item.icon className="w-4 h-4 text-muted-foreground" />
-								<p className="text-muted-foreground">
+							<div className="flex items-center gap-3 my-2">
+								<item.icon className="w-5 h-5 text-red-500" />
+								<p className="text-muted-foreground font-medium">
 									{item.label}
 								</p>
 							</div>
-							<div className="mt-2">
+							<div className="mt-4">
 								<div className="max-w-full">
 									<div className="flex gap-3">
 										<p
@@ -152,7 +151,7 @@ export default function Features({ stars }: FeaturesProps) {
 										/>
 									</div>
 								</div>
-								<p className="mt-2 text-sm text-left text-muted-foreground">
+								<p className="mt-4 text-sm text-left text-muted-foreground leading-relaxed">
 									{item.description}
 								</p>
 							</div>
@@ -161,18 +160,18 @@ export default function Features({ stars }: FeaturesProps) {
 				</div>
 
 				{/* What You Get Section */}
-				<div className="border-l-[1.2px] border-t-[1.2px] border-border p-10 pb-2">
-					<div className="flex items-center gap-2 my-1">
-						<Package className="w-4 h-4 text-muted-foreground" />
-						<p className="text-muted-foreground">
-							What You Get
+				<div className="border-l-[1.2px] border-t-[1.2px] border-border p-12 pb-6">
+					<div className="flex items-center gap-3 my-2">
+						<CheckCircle className="w-5 h-5 text-green-500" />
+						<p className="text-muted-foreground font-medium">
+							The Solution
 						</p>
 					</div>
-					<div className="mt-2">
+					<div className="mt-4">
 						<div className="max-w-full">
 							<div className="flex gap-3">
-								<p className="max-w-lg text-xl font-normal tracking-tighter md:text-2xl text-foreground">
-									Everything you need to understand your users:
+								<p className="max-w-lg text-2xl font-normal tracking-tighter md:text-3xl text-foreground">
+									Why better-ratelimit?
 								</p>
 							</div>
 						</div>
@@ -188,16 +187,16 @@ export default function Features({ stars }: FeaturesProps) {
 						<div
 							key={item.id}
 							className={cn(
-								"justify-center border-l-[1.2px] border-border border-b-[1.2px] md:min-h-[240px] border-t-[1.2px] md:border-t-0 transform-gpu flex flex-col p-10",
+								"justify-center border-l-[1.2px] border-border border-b-[1.2px] md:min-h-[280px] border-t-[1.2px] md:border-t-0 transform-gpu flex flex-col p-12 hover:bg-muted/30 transition-colors duration-200",
 							)}
 						>
-							<div className="flex items-center gap-2 my-1">
-								<item.icon className="w-4 h-4 text-muted-foreground" />
-								<p className="text-muted-foreground">
+							<div className="flex items-center gap-3 my-2">
+								<item.icon className="w-5 h-5 text-green-500" />
+								<p className="text-muted-foreground font-medium">
 									{item.label}
 								</p>
 							</div>
-							<div className="mt-2">
+							<div className="mt-4">
 								<div className="max-w-full">
 									<div className="flex gap-3">
 										<p
@@ -207,7 +206,7 @@ export default function Features({ stars }: FeaturesProps) {
 										/>
 									</div>
 								</div>
-								<p className="mt-2 text-sm text-left text-muted-foreground">
+								<p className="mt-4 text-sm text-left text-muted-foreground leading-relaxed">
 									{item.description}
 								</p>
 							</div>
@@ -216,32 +215,39 @@ export default function Features({ stars }: FeaturesProps) {
 				</div>
 
 				{/* For Who Section */}
-				<div className="border-l-[1.2px] border-t-[1.2px] border-border p-10 pb-2">
-					<div className="flex items-center gap-2 my-1">
-						<Users className="w-4 h-4 text-muted-foreground" />
-						<p className="text-muted-foreground">
+				<div className="border-l-[1.2px] border-t-[1.2px] border-border p-12 pb-6">
+					<div className="flex items-center gap-3 my-2">
+						<Users className="w-5 h-5 text-blue-500" />
+						<p className="text-muted-foreground font-medium">
 							For Who?
 						</p>
 					</div>
-					<div className="mt-2">
+					<div className="mt-4">
 						<div className="max-w-full">
 							<div className="flex gap-3">
-								<p className="max-w-lg text-xl font-normal tracking-tighter md:text-2xl text-foreground">
-									If you're a developer, indie hacker, or small team who wants to:
+								<p className="max-w-lg text-2xl font-normal tracking-tighter md:text-3xl text-foreground">
+									If you're a developer who wants to:
 								</p>
 							</div>
 						</div>
-						<p className="mt-2 text-sm text-left text-muted-foreground">
-							• Stop blindly shipping features<br />
-							• Stay GDPR-compliant without paying a lawyer<br />
-							• Avoid tracking your users like it's 2010<br /><br />
-							Then Databuddy is for you.
+						<div className="mt-6 space-y-3">
+							<div className="flex items-center gap-3">
+								<CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
+								<span className="text-sm text-muted-foreground">Build rate limiting that works everywhere</span>
+							</div>
+							<div className="flex items-center gap-3">
+								<CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
+								<span className="text-sm text-muted-foreground">Have type-safe configuration with full IntelliSense</span>
+							</div>
+							<div className="flex items-center gap-3">
+								<CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
+								<span className="text-sm text-muted-foreground">Avoid vendor lock-in with adapter-based design</span>
+							</div>
+						</div>
+						<p className="mt-6 text-sm text-muted-foreground font-medium">
+							Then better-ratelimit is for you.
 						</p>
 					</div>
-				</div>
-
-				<div className="w-full border-l hidden md:block">
-					<Testimonials />
 				</div>
 			</div>
 		</div>

@@ -1,6 +1,5 @@
 import Hero from "@/components/landing/hero";
 import Features from "@/components/features";
-import Comparison from "@/components/landing/comparison";
 import FAQ from "@/components/landing/faq";
 import CTA from "@/components/landing/cta";
 
@@ -36,9 +35,6 @@ export default async function HomePage() {
 			<Hero />
 
 			<Features stars={null} />
-
-
-			<Comparison />
 
 			<FAQ />
 
