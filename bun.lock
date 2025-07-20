@@ -13,6 +13,7 @@
       "name": "better-ratelimit-docs",
       "version": "0.0.0",
       "dependencies": {
+        "@databuddy/sdk": "^1.4.0",
         "@hookform/resolvers": "^5.0.1",
         "@radix-ui/react-accordion": "^1.2.11",
         "@radix-ui/react-alert-dialog": "^1.1.14",
@@ -123,6 +124,8 @@
     "@biomejs/cli-win32-arm64": ["@biomejs/cli-win32-arm64@2.1.2", "", { "os": "win32", "cpu": "arm64" }, "sha512-G8KWZli5ASOXA3yUQgx+M4pZRv3ND16h77UsdunUL17uYpcL/UC7RkWTdkfvMQvogVsAuz5JUcBDjgZHXxlKoA=="],
 
     "@biomejs/cli-win32-x64": ["@biomejs/cli-win32-x64@2.1.2", "", { "os": "win32", "cpu": "x64" }, "sha512-9zajnk59PMpjBkty3bK2IrjUsUHvqe9HWwyAWQBjGLE7MIBjbX2vwv1XPEhmO2RRuGoTkVx3WCanHrjAytICLA=="],
+
+    "@databuddy/sdk": ["@databuddy/sdk@1.4.0", "", {}, "sha512-D942LEorC1W6vp2qDK8LSJYAlLOW3CUo4RDihTx+V6KfmhdOB7JqltZbHAnneB9G91z7gMT0kj2Cu2BWcrPu4A=="],
 
     "@date-fns/tz": ["@date-fns/tz@1.2.0", "", {}, "sha512-LBrd7MiJZ9McsOgxqWX7AaxrDjcFVjWH/tIKJd7pnR7McaslGYOP1QmmiBXdJH/H/yLCT+rcQ7FaPBUxRGUtrg=="],
 

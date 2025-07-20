@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { ThemeProvider } from "next-themes";
 import { Navbar } from "@/components/navbar";
 import Footer from "@/components/footer";
+import { Databuddy } from "@databuddy/sdk";
 import "./global.css";
 
 const geist = Geist({
@@ -64,6 +65,7 @@ export default function RootLayout({
           geistMono.variable
         )}
       >
+        <Databuddy clientId="RGqg09Ja1rhVvtd5kczlx" trackErrors trackWebVitals trackInteractions trackOutgoingLinks />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
