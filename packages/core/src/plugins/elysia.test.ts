@@ -176,7 +176,9 @@ describe("Elysia Plugin", () => {
             plugin(app)
             await app.simulateRequest(ctx)
 
-            expect(ctx.set.headers["X-RateLimit-Metadata"]).toBe('{"test":"value"}')
+            const metadata = JSON.parse(ctx.set.headers["X-RateLimit-Metadata"] || "{}")
+            expect(metadata.test).toBe("value")
+            expect(metadata.strategy).toBe("fixed-window")
         })
     })
 
@@ -224,10 +226,18 @@ describe("Elysia Plugin", () => {
             })
 
             plugin(app)
-            await app.simulateRequest(ctx) // First request
-            await app.simulateRequest(ctx) // Second request
+            await app.simulateRequest(ctx) // First request - allowed
 
-            expect(ctx.set.headers["X-RateLimit-Limit"]).toBeUndefined()
+            // Create fresh context for second request
+            const ctx2: ElysiaContext = {
+                headers: { "x-forwarded-for": "203.0.113.1" },
+                set: { status: 200, headers: {} }
+            }
+            const result = await app.simulateRequest(ctx2) // Second request - blocked
+
+            // Headers should not be set on the blocked request when includeHeaders is false
+            expect(result).toBe("Too Many Requests")
+            expect(ctx2.set.headers["X-RateLimit-Limit"]).toBeUndefined()
         })
     })
 
@@ -240,7 +250,7 @@ describe("Elysia Plugin", () => {
             const plugin = withRateLimiter({
                 limit: 1,
                 duration: "1m",
-                onLimit: (ctx: ElysiaContext, result: RateLimitResult) => {
+                onLimit: function (ctx: ElysiaContext, result: RateLimitResult) {
                     limitCalled = true
                     limitCtx = ctx
                     limitResult = result
@@ -264,7 +274,7 @@ describe("Elysia Plugin", () => {
             const plugin = withRateLimiter({
                 limit: 5,
                 duration: "1m",
-                onSuccess: (ctx, result) => {
+                onSuccess: function (ctx: ElysiaContext, result: RateLimitResult) {
                     successCalled = true
                     successCtx = ctx
                     successResult = result

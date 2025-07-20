@@ -26,6 +26,7 @@ export class ApproximatedSlidingWindowStrategy implements RateLimitStrategy {
             limit: config.limit,
             key: config.key,
             metadata: {
+                ...config.metadata,
                 strategy: this.name,
                 windowStart,
                 windowEnd,

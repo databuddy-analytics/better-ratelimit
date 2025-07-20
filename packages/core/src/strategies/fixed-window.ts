@@ -23,6 +23,7 @@ export class FixedWindowStrategy implements RateLimitStrategy {
             limit: config.limit,
             key: config.key,
             metadata: {
+                ...config.metadata, // Include user-provided metadata
                 strategy: this.name,
                 windowStart,
                 windowEnd,

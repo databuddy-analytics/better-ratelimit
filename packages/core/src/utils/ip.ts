@@ -41,6 +41,14 @@ export function isPrivateIP(ip: string): boolean {
     if (!ip || ip === "unknown") return false
 
     const cleanIP = ip.replace(/^::ffff:/, "")
+
+    const ipv4Regex = /^(\d{1,3}\.){3}\d{1,3}$/
+    const ipv6Regex = /^[0-9a-fA-F:]+$/
+
+    if (!ipv4Regex.test(cleanIP) && !ipv6Regex.test(cleanIP)) {
+        return false
+    }
+
     const privateRanges = [
         /^10\./,
         /^172\.(1[6-9]|2[0-9]|3[0-1])\./,

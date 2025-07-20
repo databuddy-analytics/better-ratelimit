@@ -84,13 +84,9 @@ export class MemoryStore implements RateLimitStore {
         const expires = Date.now() + ttl
         const newEntry = { value: newValue, expires }
 
-        if (ttl <= 0) {
-            this.options.onSet(key, newEntry)
-            return newValue
-        }
-
         this.cache.set(key, newEntry, { ttl })
         this.options.onSet(key, newEntry)
+
         return newValue
     }
 

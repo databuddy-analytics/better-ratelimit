@@ -188,7 +188,9 @@ describe("Hono Plugin", () => {
                 headers: { "x-forwarded-for": "203.0.113.1" }
             })
 
-            expect(res.headers.get("X-RateLimit-Metadata")).toBe('{"test":"value"}')
+            const metadata = JSON.parse(res.headers.get("X-RateLimit-Metadata") || "{}")
+            expect(metadata.test).toBe("value")
+            expect(metadata.strategy).toBe("fixed-window")
         })
     })
 
@@ -431,12 +433,11 @@ describe("Hono Plugin", () => {
             app.use("*", middleware)
             app.get("/", (c) => c.json({ message: "Hello" }))
 
-            // Simulate concurrent requests
             const promises: Array<Promise<Response> | Response> = []
             for (let i = 0; i < 5; i++) {
                 promises.push(app.request("/", {
                     headers: {
-                        "x-forwarded-for": `203.0.113.${i}`
+                        "x-forwarded-for": "203.0.113.1"
                     }
                 }))
             }

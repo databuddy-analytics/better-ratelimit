@@ -34,10 +34,13 @@ export class RateLimiter {
 
     async check(key: string): Promise<RateLimitResult> {
         const ttl = parseDuration(this.options.duration)
+
+        // Increment first to get the new count atomically
         const current = await this.store.increment(key, ttl)
 
         const strategy = Effect.runSync(getStrategy(this.options.strategy))
 
+        // Check if the incremented value is allowed
         const result = strategy.check(current, {
             key,
             limit: this.options.limit,
@@ -51,6 +54,10 @@ export class RateLimiter {
         if (result.allowed) {
             this.options.onSuccess(result)
         } else {
+            const currentValue = await this.store.get(key) || 0
+            if (currentValue > 0) {
+                await this.store.set(key, currentValue - 1, ttl)
+            }
             this.options.onLimit(result)
         }
 

@@ -21,6 +21,7 @@ export class SlidingWindowStrategy implements RateLimitStrategy {
             limit: config.limit,
             key: config.key,
             metadata: {
+                ...config.metadata,
                 strategy: this.name,
                 windowStart,
                 windowEnd: now,

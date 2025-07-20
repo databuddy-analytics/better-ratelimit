@@ -2,7 +2,7 @@ import type { RateLimitResult, RateLimitStore } from "../types"
 import type { StrategyName } from "../strategies"
 import { RateLimiter } from "../core/rate-limiter"
 import { MemoryStore } from "../adapters/memory"
-import { getIPKey } from "../utils/ip"
+import { getIPKey, getClientIP, type RequestContext } from "../utils/ip"
 import type { Context, Next } from "hono"
 
 export interface HonoRateLimitOptions {
@@ -30,14 +30,21 @@ export interface HonoRateLimitOptions {
 
 export function withRateLimiter(options: HonoRateLimitOptions) {
     const store = options.store || new MemoryStore()
-    const rateLimiter = new RateLimiter(store, {
+
+    // Only include strategy if it's defined to avoid overriding the default
+    const rateLimiterOptions: any = {
         limit: options.limit,
         duration: options.duration,
-        strategy: options.strategy,
         burst: options.burst,
         prefix: options.prefix,
         metadata: options.metadata
-    })
+    }
+
+    if (options.strategy) {
+        rateLimiterOptions.strategy = options.strategy
+    }
+
+    const rateLimiter = new RateLimiter(store, rateLimiterOptions)
 
     const headerOptions = {
         enabled: true,
@@ -54,11 +61,23 @@ export function withRateLimiter(options: HonoRateLimitOptions) {
     }
 
     return async (ctx: Context, next: Next) => {
-        const key = options.key ? options.key(ctx) : getIPKey({ ip: ctx.req.header("x-forwarded-for") || ctx.req.header("x-real-ip") || "unknown" })
+        // Create proper request context with all headers
+        const requestContext: RequestContext = {
+            ip: getClientIP({
+                headers: ctx.req.header(),
+                ip: ctx.req.header("x-forwarded-for") || ctx.req.header("x-real-ip")
+            }),
+            headers: ctx.req.header()
+        }
+
+        const key = options.key ? options.key(ctx) : getIPKey(requestContext)
 
         const result = await rateLimiter.check(key)
 
-        if (headerOptions.enabled) {
+        const shouldSetHeaders = headerOptions.enabled &&
+            (result.allowed || (responseOptions.includeHeaders && !result.allowed))
+
+        if (shouldSetHeaders) {
             const prefix = headerOptions.prefix
             ctx.header(`${prefix}-Limit`, result.limit.toString())
             ctx.header(`${prefix}-Remaining`, result.remaining.toString())
