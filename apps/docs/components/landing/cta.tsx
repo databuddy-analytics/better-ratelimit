@@ -35,7 +35,7 @@ export default function CTA() {
                                     </span>
                                 </Link>
                                 <Link
-                                    href="https://github.com/your-org/better-ratelimit"
+                                    href="https://github.com/databuddy-analytics/better-ratelimit"
                                     className="group inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-foreground transition-all duration-300 bg-background/50 border border-border/50 backdrop-blur-sm rounded-xl hover:bg-background hover:border-border focus:outline-none focus:ring-2 focus:ring-border focus:ring-offset-2 focus:ring-offset-background shadow-lg hover:shadow-border/20"
                                     target="_blank"
                                     rel="noopener noreferrer"
