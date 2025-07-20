@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from "bun:test"
 import { withRateLimiter, type HonoRateLimitOptions } from "./hono"
 import { MemoryStore } from "../adapters/memory"
 import type { RateLimitResult } from "../types"
-import { Hono } from "hono"
+import { Hono, type Context } from "hono"
 
 describe("Hono Plugin", () => {
     let app: Hono
@@ -266,13 +266,13 @@ describe("Hono Plugin", () => {
     describe("callbacks", () => {
         it("should call onLimit callback", async () => {
             let limitCalled = false
-            let limitCtx: any = null
-            let limitResult: RateLimitResult | null = null
+            let limitCtx: Context | undefined = undefined
+            let limitResult: RateLimitResult | undefined = undefined
 
             const middleware = withRateLimiter({
                 limit: 1,
                 duration: "1m",
-                onLimit: (ctx: any, result: RateLimitResult) => {
+                onLimit: (ctx: Context, result: RateLimitResult) => {
                     limitCalled = true
                     limitCtx = ctx
                     limitResult = result
@@ -296,13 +296,13 @@ describe("Hono Plugin", () => {
 
         it("should call onSuccess callback", async () => {
             let successCalled = false
-            let successCtx: any = null
-            let successResult: RateLimitResult | null = null
+            let successCtx: Context | undefined = undefined
+            let successResult: RateLimitResult | undefined = undefined
 
             const middleware = withRateLimiter({
                 limit: 5,
                 duration: "1m",
-                onSuccess: (ctx: any, result: RateLimitResult) => {
+                onSuccess: (ctx: Context, result: RateLimitResult) => {
                     successCalled = true
                     successCtx = ctx
                     successResult = result
@@ -433,13 +433,13 @@ describe("Hono Plugin", () => {
             app.use("*", middleware)
             app.get("/", (c) => c.json({ message: "Hello" }))
 
-            const promises: Array<Promise<Response> | Response> = []
+            const promises: Array<Promise<Response>> = []
             for (let i = 0; i < 5; i++) {
-                promises.push(app.request("/", {
+                promises.push(Promise.resolve(app.request("/", {
                     headers: {
                         "x-forwarded-for": "203.0.113.1"
                     }
-                }))
+                })))
             }
 
             const responses = await Promise.all(promises)

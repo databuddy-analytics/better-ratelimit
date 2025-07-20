@@ -1,5 +1,4 @@
 export interface RequestContext {
-    ip?: string
     headers?: Record<string, string>
     connection?: {
         remoteAddress?: string
@@ -9,8 +8,17 @@ export interface RequestContext {
     }
 }
 
-export function getClientIP(ctx: RequestContext): string {
-    const headers = ctx.headers || {}
+type HeadersInput = Record<string, string> | RequestContext
+
+function extractHeaders(input: HeadersInput): Record<string, string> {
+    if ('headers' in input && input.headers && typeof input.headers === 'object') {
+        return input.headers
+    }
+    return input as Record<string, string>
+}
+
+export function getClientIP(input: HeadersInput): string {
+    const headers = extractHeaders(input)
 
     if (headers["cf-connecting-ip"]) return headers["cf-connecting-ip"]
     if (headers["fastly-client-ip"]) return headers["fastly-client-ip"]
@@ -24,9 +32,6 @@ export function getClientIP(ctx: RequestContext): string {
     if (headers["x-cluster-client-ip"]) return headers["x-cluster-client-ip"]
     if (headers["x-vercel-forwarded-for"]) return headers["x-vercel-forwarded-for"]
     if (headers["x-netlify-forwarded-for"]) return headers["x-netlify-forwarded-for"]
-    if (ctx.ip) return ctx.ip
-    if (ctx.connection?.remoteAddress) return ctx.connection.remoteAddress
-    if (ctx.socket?.remoteAddress) return ctx.socket.remoteAddress
 
     return "unknown"
 }
@@ -64,28 +69,30 @@ export function isPrivateIP(ip: string): boolean {
     return privateRanges.some(range => range.test(cleanIP))
 }
 
-export function getIPKey(ctx: RequestContext, prefix = "ip"): string {
-    const ip = getClientIP(ctx)
+export function getIPKey(input: HeadersInput, prefix = "ip"): string {
+    const headers = extractHeaders(input)
+    const ip = getClientIP(headers)
     if (ip === "unknown" || isPrivateIP(ip)) {
         return `${prefix}:fallback`
     }
     return `${prefix}:${ip}`
 }
 
-export function getClientIPWithContext(ctx: RequestContext): {
+export function getClientIPWithContext(input: HeadersInput): {
     ip: string
     source: string
     isPrivate: boolean
     headers: string[]
 } {
-    const headers = ctx.headers || {}
+    const headers = extractHeaders(input)
+
     const availableHeaders = Object.keys(headers).filter(key =>
         key.toLowerCase().includes("ip") ||
         key.toLowerCase().includes("forwarded") ||
         key.toLowerCase().includes("client")
     )
 
-    const ip = getClientIP(ctx)
+    const ip = getClientIP(headers)
     const isPrivate = isPrivateIP(ip)
 
     let source = "unknown"
@@ -93,9 +100,6 @@ export function getClientIPWithContext(ctx: RequestContext): {
     else if (headers["fastly-client-ip"]) source = "fastly"
     else if (headers["x-forwarded-for"]) source = "x-forwarded-for"
     else if (headers["x-real-ip"]) source = "x-real-ip"
-    else if (ctx.ip) source = "ctx.ip"
-    else if (ctx.connection?.remoteAddress) source = "connection.remoteAddress"
-    else if (ctx.socket?.remoteAddress) source = "socket.remoteAddress"
 
     return {
         ip,

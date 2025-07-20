@@ -244,8 +244,8 @@ describe("Elysia Plugin", () => {
     describe("callbacks", () => {
         it("should call onLimit callback", async () => {
             let limitCalled = false
-            let limitCtx: ElysiaContext | null = null
-            let limitResult: RateLimitResult | null = null
+            let limitCtx: ElysiaContext | undefined = undefined
+            let limitResult: RateLimitResult | undefined = undefined
 
             const plugin = withRateLimiter({
                 limit: 1,
@@ -262,7 +262,8 @@ describe("Elysia Plugin", () => {
             await app.simulateRequest(ctx) // Second request
 
             expect(limitCalled).toBe(true)
-            expect(limitCtx).toBe(ctx)
+            expect(limitCtx).toBeDefined()
+            expect(limitCtx!).toBe(ctx)
             expect(limitResult?.allowed).toBe(false)
         })
 
@@ -285,7 +286,8 @@ describe("Elysia Plugin", () => {
             await app.simulateRequest(ctx)
 
             expect(successCalled).toBe(true)
-            expect(successCtx).toBe(ctx)
+            expect(successCtx).toBeDefined()
+            expect(successCtx!).toBe(ctx)
             expect(successResult?.allowed).toBe(true)
         })
     })
