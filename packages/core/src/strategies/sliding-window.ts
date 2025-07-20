@@ -30,7 +30,7 @@ export class SlidingWindowStrategy implements RateLimitStrategy {
         }
     }
 
-    shouldReset(current: number, config: RateLimitConfig): boolean {
+    shouldReset(_current: number, _config: RateLimitConfig): boolean {
         return false
     }
 } 

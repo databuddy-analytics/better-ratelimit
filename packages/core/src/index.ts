@@ -11,6 +11,7 @@ export { RedisAdapter, type RedisAdapterOptions } from "./adapters/redis"
 
 export { withRateLimiter, type ElysiaContext, type ElysiaApp, type ElysiaRateLimitOptions } from "./plugins/elysia"
 export { withRateLimiter as withHonoRateLimiter, type HonoRateLimitOptions } from "./plugins/hono"
+export { createRateLimitHandler, createNextJSRateLimiter, type NextJSRateLimitOptions } from "./plugins/nextjs"
 
 export { parseDuration, formatDuration } from "./utils/duration"
 export { getClientIP, getIPKey, isPrivateIP, getClientIPWithContext, type RequestContext } from "./utils/ip"

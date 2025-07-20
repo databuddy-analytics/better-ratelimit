@@ -1,5 +1,5 @@
 import { Effect } from "effect"
-import type { RateLimitConfig, RateLimitResult, RateLimitStore, RateLimitOptions } from "../types"
+import type { RateLimitConfig, RateLimitResult, RateLimitStore } from "../types"
 import { parseDuration } from "../utils/duration"
 import { getStrategy, type StrategyName } from "../strategies"
 

@@ -4,7 +4,6 @@ import Link from "next/link";
 import { Home, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import LiquidChrome from "@/components/bits/liquid";
-import { Navbar } from "@/components/navbar";
 import { Geist } from "next/font/google";
 
 const geist = Geist({ subsets: ['latin'] });
@@ -12,7 +11,6 @@ const geist = Geist({ subsets: ['latin'] });
 export default function NotFound() {
     return (
         <div className="flex flex-col min-h-screen bg-neutral-950">
-            <Navbar />
             <div className="relative flex-grow w-full h-full overflow-hidden flex flex-col items-center justify-center p-4">
                 {/* Liquid Chrome Background */}
                 <div className="absolute inset-0 opacity-40">

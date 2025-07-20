@@ -37,7 +37,7 @@ export class ApproximatedSlidingWindowStrategy implements RateLimitStrategy {
         }
     }
 
-    shouldReset(current: number, config: RateLimitConfig): boolean {
+    shouldReset(_current: number, config: RateLimitConfig): boolean {
         const now = this.getNow()
         const windowSize = parseDuration(config.duration)
         const subWindowSize = windowSize / 10

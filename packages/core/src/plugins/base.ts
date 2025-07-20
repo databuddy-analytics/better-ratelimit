@@ -1,5 +1,4 @@
-import type { RateLimitResult, RateLimitStore, BaseRateLimitOptions } from "../types"
-import type { StrategyName } from "../strategies"
+import type { BaseRateLimitOptions } from "../types"
 import { RateLimiter } from "../core/rate-limiter"
 import { MemoryStore } from "../adapters/memory"
 import { getIPKey } from "../utils/ip"
